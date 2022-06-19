@@ -1,3 +1,5 @@
+let howMany = 0;
+
 class ReactClone {
   static render(mainElement, componentTree) {
     const component = new componentTree();
@@ -16,6 +18,13 @@ class Component {
   }
 
   renderHtml(parent = this.parent) {
+    if (!this.rendered && this.componentDidMount) {
+      console.log(this);
+      this.rendered = true;
+      this.componentDidMount();
+      console.log(this);
+    }
+
     const html = this.render();
     if (!Array.isArray(html)) {
       throw new Error(
@@ -64,8 +73,9 @@ class Component {
         "setState is only callable within components with state."
       );
     }
+    const oldState = this.state;
     const returnedState = cb(this.state);
-    if (this.state === returnedState) return;
+    if (returnedState === oldState) return;
 
     this.reRender();
   }
@@ -157,6 +167,10 @@ class TestChildComponent extends Component {
       },
     ];
   }
+
+  componentDidMount() {
+    console.log("how many?: ", howMany++);
+  }
 }
 
 class PropsComponent extends Component {
@@ -218,6 +232,12 @@ class MyComponent extends Component {
       },
       new PropsComponent({ clicked: this.state.clicked }),
     ];
+  }
+
+  componentDidMount() {
+    this.setState((state) => {
+      return { ...state, clicked: 5 };
+    });
   }
 }
 
